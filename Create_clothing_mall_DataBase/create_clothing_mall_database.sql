@@ -74,6 +74,9 @@ create table product_order(
 # 주문 테이블 총 가격 컬럼 추가
 alter table product_order add column total_price int not null default 0;
 
+# 주문번호 1번인 상품의 총 가격 업데이트
+UPDATE product_order SET total_price = (SELECT SUM(unit_price * Quantity) FROM order_detail WHERE order_id = 1) WHERE order_id = 1;
+
 # order_detail(주문세부) 테이블 생성
 create table order_detail(
     order_id int not null,								# 주문번호
@@ -139,7 +142,7 @@ create table product_view(			# 조회 정보 테이블 생성
 
 alter table product_option drop column color; # color 컬럼 삭제
 
-# 사이즈 S/M/L/XL인 상품 삽입
+# 사이즈 S/M/L/XL인 상품 삽입   83044개
 insert into product_option(product_id, size, stock) select product.product_id, sizes.size, 10 + floor(rand()*41) 
 from product 
 cross join(select 'S' as size union	all select 'M' union all select 'L' union all select 'XL') as sizes
@@ -151,7 +154,7 @@ where product.article_type in ('Tshirts', 'Jackets', 'Shorts', 'Track Pants', 'S
 , 'Robe', 'Shapewear', 'Salwar and Dupatta', 'Baby Dolls', 'Rain Jacket', 'Rain Trousers', 'Lounge Tshirts'
 , 'Bath Robe');
 
-# 사이즈 Free인 상품 삽입
+# 사이즈 Free인 상품 삽입   639개
 insert into product_option(product_id, size, stock) select product.product_id, sizes.size, 10 + floor(rand()*41) 
 from product 
 cross join(select 'Free' as size) as sizes
