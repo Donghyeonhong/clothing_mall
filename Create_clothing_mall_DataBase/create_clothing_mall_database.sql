@@ -18,6 +18,9 @@ CREATE TABLE product (
     product_name VARCHAR(255)	 						# 상품이름
 );
 
+# product 테이블에 가격 컬럼 추가
+alter table product add column price int not null check(price >= 0) default 0; 
+
 # python과 mysql연결을 통해 21400개 데이터 삽입 확인
 select count(*) from product;
 
@@ -31,6 +34,8 @@ create table mall_member(
 	phone_number varchar(20),							# 전화번호
 	sign_up_date datetime default current_timestamp		# 가입일
 );
+
+# 회원 테이블의 이메일, 번호 컬럼 제약조건 수정
 alter table mall_member modify email varchar(100) not null;
 alter table mall_member modify phone_number	varchar(20) not null;
 alter table mall_member add constraint unique(email);
@@ -66,6 +71,9 @@ create table product_order(
     foreign key (member_id) references mall_member(member_id)
 );
 
+# 주문 테이블 총 가격 컬럼 추가
+alter table product_order add column total_price int not null default 0;
+
 # order_detail(주문세부) 테이블 생성
 create table order_detail(
     order_id int not null,								# 주문번호
@@ -78,7 +86,8 @@ create table order_detail(
     primary key(order_id, option_id)
 );
 
-alter table product add column price int not null check(price >= 0) default 0; # product 테이블에 가격 컬럼 추가
+# 주문세부 테이블 개당 가격 컬럼 추가
+alter table order_detail add column unit_price int not null check(unit_price >= 0); 
 
 update product set price =    #가격 책정
 	case 
@@ -94,8 +103,6 @@ update product set price =    #가격 책정
 				40000 + floor(rand()*41) * 1000
 	end
 ;
-
-select article_type, count(*) from product where price between 5000 and 20000 group by article_type;
 
 create table wishlist(			# 찜 목록 테이블 생성
 	wishlist_id int auto_increment primary key,			# 찜 번호
@@ -149,19 +156,3 @@ insert into product_option(product_id, size, stock) select product.product_id, s
 from product 
 cross join(select 'Free' as size) as sizes
 where product.article_type in ('Dupatta', 'Sarees', 'Stockings', 'Tights', 'Belts', 'Suspenders', 'Booties');
-
-# 테스트용 회원 더미 데이터 삽입
-#delimiter $$
-#create procedure create_testmember()
-#	begin
-#		declare x int default 1;
-        
-#       while x<=7000 do
-#			insert into mall_member(login_id, login_password, member_name, email, phone_number)
-#            values(concat('testid', x), x, concat('test', x), concat('testid', x, '@gmail.com'), concat_ws('-','010','0000', lpad(x,4,'0')));
-#            set x = x+1;
-#		end while;
-#	end $$
-#delimiter ; 
-
-
