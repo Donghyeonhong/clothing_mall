@@ -130,6 +130,10 @@ create table review(			# 리뷰 테이블 생성
     unique(member_id, product_id)
 );
 
+select * from information_schema.table_constraints where constraint_schema = 'clothing_mall' and table_name = 'review';
+alter table review drop constraint review_chk_1;
+alter table review add constraint check (review_score between 1 and 5);
+
 create table product_view(			# 조회 정보 테이블 생성
 	view_id int auto_increment primary key,				# 조회번호
     member_id int,										# 회원번호(비회원가능)
@@ -159,3 +163,5 @@ insert into product_option(product_id, size, stock) select product.product_id, s
 from product 
 cross join(select 'Free' as size) as sizes
 where product.article_type in ('Dupatta', 'Sarees', 'Stockings', 'Tights', 'Belts', 'Suspenders', 'Booties');
+
+select * from wishlist order by wishlist_id;
