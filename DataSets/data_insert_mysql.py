@@ -1,6 +1,9 @@
 import pandas as pd
 import mysql.connector
 
+from dotenv import load_dotenv
+import os
+
 # CSV 파일
 csv_path = r"C:\Users\ooooo\OneDrive\Desktop\졸업작품\데이터셋\clothing_products.csv"
 
@@ -8,12 +11,14 @@ csv_path = r"C:\Users\ooooo\OneDrive\Desktop\졸업작품\데이터셋\clothing_
 df = pd.read_csv(csv_path)
 df = df.astype(object).where(pd.notna(df), None)
 
-# MySQL 연결
+load_dotenv()
+
+# mysql 연결
 conn = mysql.connector.connect(
     host="localhost",
     port=3306,
     user="root",
-    password="REDACTED_PASSWORD",
+    password=os.getenv("DB_PASSWORD"),
     database="clothing_mall"
 )
 
