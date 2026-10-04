@@ -11,12 +11,18 @@
 --     master_category VARCHAR(50), 						# 상품 분류 (의류)
 --     sub_category VARCHAR(50),    						# 상의/하의/속옷 등 구분
 --     article_type VARCHAR(100),	 						# 옷 종류
---     base_colour VARCHAR(30),	 						# 기본 색
+--     base_colour VARCHAR(30),	 						    # 기본 색
 --     season VARCHAR(20),  	     						# 계절
 --     release_year YEAR,			 						# 출시년도
 --     usage_type VARCHAR(50),		 						# 스타일, 용도
 --     product_name VARCHAR(255)	 						# 상품이름
 -- );
+
+-- # 상품이름, 상품 분류 컬럼들 not null 제약 추가
+-- alter table product modify column product_name VARCHAR(255) not null;  
+-- alter table product modify column article_type varchar(100) not null;
+-- alter table product modify column master_category varchar(50) not null;
+-- alter table product modify column sub_category varchar(50) not null;
 
 -- # product 테이블에 가격 컬럼 추가
 -- alter table product add column price int not null check(price >= 0) default 0; 
@@ -35,6 +41,9 @@
 -- 	sign_up_date datetime default current_timestamp		# 가입일
 -- );
 
+-- # 회원 테이블의 가입일 컬럼 제약조건 수정
+-- alter table mall_member modify column sign_up_date datetime not null;
+
 -- # 회원 테이블의 이메일, 번호 컬럼 제약조건 수정
 -- alter table mall_member modify email varchar(100) not null;
 -- alter table mall_member modify phone_number	varchar(20) not null;
@@ -44,20 +53,28 @@
 
 -- # product_option(상품 옵션) 테이블 생성
 -- create table product_option(
--- 	option_id int auto_increment primary key,			# 옵션번호
---     product_id int not null,							# 상품번호
+-- 	option_id int auto_increment primary key,			    # 옵션번호
+--     product_id int not null,							    # 상품번호
 --     size varchar(20) not null,							# 사이즈
 --     color varchar(30) not null,							# 색
 --     stock int not null default 0,						# 재고
+
 --     foreign key(product_id) references product(product_id)
 -- );
 
+-- #alter table product_option drop column color; # color 컬럼 삭제
+
+-- # stock 컬럼 0 이상 제약조건 추가 및 (product_id, size) UNIQUE 제약 추가
+-- alter table product_option add constraint check(stock >= 0);
+-- alter table product_option add constraint unique(product_id, size);
+
 -- # cart(장바구니) 테이블 생성
 -- create table cart(
--- 	cart_number int auto_increment primary key,			# 장바구니 번호
+-- 	cart_number int auto_increment primary key,			    # 장바구니 번호
 --     member_id int not null,								# 회원번호
 --     option_id int not null,								# 옵션번호		
 --     Quantity int not null check(Quantity >= 1),			# 수량
+
 --     foreign key (member_id) references mall_member(member_id), 		
 --     foreign key (option_id) references product_option(option_id),
 --     unique(member_id, option_id)
@@ -65,11 +82,15 @@
 --     
 -- # product_order(주문) 테이블 생성
 -- create table product_order(
--- 	order_id int auto_increment primary key,			# 주문번호
+-- 	order_id int auto_increment primary key,			    # 주문번호
 --     member_id int not null,								# 회원번호
 --     order_date datetime default current_timestamp,		# 주문일
+
 --     foreign key (member_id) references mall_member(member_id)
 -- );
+
+-- # 주문 테이블 주문일 제약조건 추가
+-- alter table product_order modify column order_date datetime not null;
 
 -- # 주문 테이블 총 가격 컬럼 추가
 -- alter table product_order add column total_price int not null default 0;
@@ -118,12 +139,12 @@
 -- );
 
 -- create table review(			# 리뷰 테이블 생성
--- 	   review_id int auto_increment primary key,			# 리뷰번호
---     member_id int not null,								# 회원번호
---     product_id int not null,							# 상품번호
+-- 	   review_id int auto_increment primary key,											# 리뷰번호
+--     member_id int not null,																# 회원번호
+--     product_id int not null,							   		 							# 상품번호
 --     review_score decimal(2, 1) not null check (review_score between 0 and 5),			# 리뷰점수
---     review_content varchar(500),						# 리뷰내용
---     review_date datetime default current_timestamp,		# 리뷰일자	
+--     review_content varchar(500),															# 리뷰내용
+--     review_date datetime default current_timestamp,										# 리뷰일자	
 --     
 --     foreign key (member_id) references mall_member(member_id),
 --     foreign key (product_id) references product(product_id),
@@ -135,16 +156,15 @@
 -- alter table review add constraint check (review_score between 1 and 5); # 리뷰점수 1에서 5점사이로 수정
 
 -- create table product_view(			# 조회 정보 테이블 생성
--- 	view_id int auto_increment primary key,				# 조회번호
+-- 	view_id int auto_increment primary key,					# 조회번호
 --     member_id int,										# 회원번호(비회원가능)
---     product_id int not null,							# 상품번호
+--     product_id int not null,								# 상품번호
 --     view_date datetime default current_timestamp,		# 조회일
 --     
 --     foreign key (member_id) references mall_member(member_id),
 --     foreign key (product_id) references product(product_id)
 -- );
 
--- #alter table product_option drop column color; # color 컬럼 삭제
 
 --  #사이즈 S/M/L/XL인 상품 삽입   83044개
 -- insert into product_option(product_id, size, stock) select product.product_id, sizes.size, 10 + floor(rand()*41) 
@@ -163,3 +183,13 @@
 -- from product 
 -- cross join(select 'Free' as size) as sizes
 -- where product.article_type in ('Dupatta', 'Sarees', 'Stockings', 'Tights', 'Belts', 'Suspenders', 'Booties');
+
+show tables;
+
+describe product_order;
+
+select * from information_schema.table_constraints where constraint_schema = 'clothing_mall' and table_name = 'cart';
+show create table product_option;
+
+select * from order_detail;
+
