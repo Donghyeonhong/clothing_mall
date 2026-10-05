@@ -94,6 +94,7 @@
 
 -- # 주문 테이블 총 가격 컬럼 추가
 -- alter table product_order add column total_price int not null default 0;
+-- alter table product_order add constraint check(total_price >= 0);
 
 -- # 주문번호 1번인 상품의 총 가격 업데이트
 -- UPDATE product_order SET total_price = (SELECT SUM(unit_price * Quantity) FROM order_detail WHERE order_id = 1) WHERE order_id = 1;
@@ -151,9 +152,12 @@
 --     unique(member_id, product_id)
 -- );
 
--- select * from information_schema.table_constraints where constraint_schema = 'clothing_mall' and table_name = 'review';
+-- # 리뷰점수 1에서 5점사이로 수정
 -- alter table review drop constraint review_chk_1;
--- alter table review add constraint check (review_score between 1 and 5); # 리뷰점수 1에서 5점사이로 수정
+-- alter table review add constraint check (review_score between 1 and 5); 
+
+-- # 리뷰일자 not null제약 추가
+-- alter table review modify column review_date datetime not null default current_timestamp;
 
 -- create table product_view(			# 조회 정보 테이블 생성
 -- 	view_id int auto_increment primary key,					# 조회번호
@@ -165,6 +169,8 @@
 --     foreign key (product_id) references product(product_id)
 -- );
 
+-- # 조회일 not null 제약 추가
+-- alter table product_view modify column view_date datetime not null default current_timestamp;
 
 --  #사이즈 S/M/L/XL인 상품 삽입   83044개
 -- insert into product_option(product_id, size, stock) select product.product_id, sizes.size, 10 + floor(rand()*41) 
@@ -183,13 +189,3 @@
 -- from product 
 -- cross join(select 'Free' as size) as sizes
 -- where product.article_type in ('Dupatta', 'Sarees', 'Stockings', 'Tights', 'Belts', 'Suspenders', 'Booties');
-
-show tables;
-
-describe product_order;
-
-select * from information_schema.table_constraints where constraint_schema = 'clothing_mall' and table_name = 'cart';
-show create table product_option;
-
-select * from order_detail;
-
