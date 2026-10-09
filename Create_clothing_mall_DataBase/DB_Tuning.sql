@@ -1,5 +1,7 @@
 use clothing_mall;
 
+
+-- product_order table tuning
 # 주문 테이블의 주문일 컬럼 인덱스 추가
 alter table product_order add index idx_order_date(order_date);
 # 주문 테이블의 주문일 컬럼 인덱스 삭제
@@ -56,8 +58,7 @@ alter table product_order drop index idx_member_order_date;
 
 # 특정 회원(회원번호 253번)의 주문 내역을 최신순으로 조회 성능
 explain analyze
-SELECT *
-FROM product_order
+SELECT * FROM product_order
 WHERE member_id = 253
 ORDER BY order_date DESC;
 
@@ -77,19 +78,13 @@ ORDER BY order_date DESC;
 # join분석
 # 회원번호 253번의 주문내역 조회 성능 분석
 explain analyze
-SELECT
-    o.order_id,
-    p.product_name,
-    po.size,
-    d.Quantity,
-    d.unit_price,
-    o.order_date
-FROM product_order o
-JOIN order_detail d
+SELECT o.order_id, p.product_name, po.size, d.Quantity,
+    d.unit_price, o.order_date FROM product_order o
+inner JOIN order_detail d
     ON o.order_id = d.order_id
-JOIN product_option po
+inner JOIN product_option po
     ON d.option_id = po.option_id
-join product p
+inner join product p
 	on po.product_id = p.product_id
 WHERE o.member_id = 253;
 
@@ -98,5 +93,56 @@ WHERE o.member_id = 253;
 -- 3. 상세주문 6개 option_id에 대해 1대1로 product_option 정보 조회
 -- 4. product_option에서 얻은 product_id를 가지고 1대1로 product 정보 조회
 
--- 실행시간은 약 0.0889ms로 측정됐으며, 
+-- 실행시간은 약 0.08ms로 측정됐으며, 
 -- join 조건에 사용되는 컬럼에 적절한 인덱스가 적용된 상태여서 추가적인 인덱스 설정은 필요하지 않은 것으로 판단
+
+
+-- order_detail table tuning
+# 주문번호 753번의 상세 주문 조회 성능 분석
+explain analyze
+select od.order_id as 주문번호, po.product_id as 상품번호, p.product_name as 상품명, 
+od.unit_price, od.Quantity, po.size from order_detail od	
+inner join product_option po on od.option_id = po.option_id
+inner join product p on po.product_id = p.product_id
+where od.order_id = 753; 
+
+-- 1. 기본키 PK(order_id, option_id)의 첫 번째 컬럼 order_id로 주문번호 753번의 주문 상세 2개 검색
+-- 2. 각각의 option_id로 product_option 테이블과 조인, 각 option_id에 대헤 옵션 정보 1개씩 조회
+-- 3. product_option의 product_id에 대해 product 테이블의 상품 정보를 1개씩 조회
+
+-- 실행시간은 약 0.04ms로 측정
+-- join 조건에 사용되는 컬럼에 적절한 인덱스가 적용된 상태여서 추가적인 인덱스 설정은 필요하지 않은 것으로 판단
+
+
+# 1. 전체 기간 동안 판매 수량이 가장 많은 상품 TOP 10 조회 성능 분석
+explain analyze
+select p.product_id as 상품번호, p.product_name as 상품명, sum(od.Quantity) as 총수량
+from product p
+inner join product_option po on p.product_id = po.product_id
+inner join order_detail od on po.option_id = od.option_id
+group by p.product_id
+order by 총수량 desc limit 10;
+-- 실행시간 약 126ms 소요
+
+
+# 2. 전체 기간 동안 판매 수량이 가장 많은 상품 TOP 10 조회 성능 분석 (수정본)
+explain analyze 
+select q.product_id, p.product_name, q.총수량 from product p
+inner join 
+(select product_id, sum(Quantity) as 총수량 from order_detail od
+inner join product_option po on od.option_id = po.option_id
+group by product_id
+order by 총수량 desc limit 10) as q
+on p.product_id = q.product_id;
+-- 실행시간 약 62.6ms 소요
+
+-- 1. 3개의 테이블을 join한 후 상품별 판매 수량을 집계하여 상위 10개의 product_id를 조회
+
+-- 2. order_detail과 product_option을 먼저 joingkdu 상품별 판매 수량을 집계하고
+-- 상위 10개의 product_id를 선정하는 인라인 뷰 서브쿼리를 생성, 
+-- 이후 인라인 뷰와 product를 join한 후 product_id와 product_name, 총수량을 조회
+
+-- 실행시간 약 126ms → 62.6ms로 단축
+-- 상위 10개의 상품을 먼저 선정한 후 product와 join하도록 쿼리 구조를 변경하여
+-- 불필요한 JOIN 작업을 줄이고 처리 데이터를 감소시킴
+-- product테이블 PK조회가 43696회에서 10회로 감소
