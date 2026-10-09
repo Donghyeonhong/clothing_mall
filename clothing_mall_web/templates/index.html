@@ -1,0 +1,25 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>나의 첫 웹 페이지</title>
+    <link
+      rel="stylesheet"
+      href="{{ url_for('static', filename='style.css') }}"
+    />
+  </head>
+  <body>
+    <h1>안녕! 나의 첫 번째 웹 페이지야!</h1>
+    <p>Flask와 HTML을 연결했어!</p>
+
+    <div class="product-list">
+      {% for product in products %}
+      <div class="product-card">
+        <p class="product-name">{{ product[0] }}</p>
+        <p class="product-price">{{ "{:,}".format(product[1])}}원</p>
+      </div>
+      {% endfor %}
+    </div>
+  </body>
+</html>

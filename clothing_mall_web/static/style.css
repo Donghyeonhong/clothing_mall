@@ -1,0 +1,40 @@
+body {
+  background-color: #eaf3ff;
+  font-family: Arial, sans-serif;
+}
+
+h1 {
+  color: blue;
+  text-align: center;
+}
+
+p {
+  color: #333333;
+  text-align: center;
+  font-size: 20px;
+}
+
+.product-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 20px;
+}
+
+.product-card {
+  width: 20%;
+  height: 200px;
+  padding: 5px;
+  border: 1px solid lightgray;
+  display: flex;
+  flex-direction: column;
+}
+
+.product-name {
+  font-size: 20px;
+  margin: 10px;
+}
+
+.product-price {
+  font-weight: bold;
+  margin-top: auto;
+}
