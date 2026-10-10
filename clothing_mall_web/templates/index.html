@@ -16,6 +16,7 @@
     <div class="product-list">
       {% for product in products %}
       <div class="product-card">
+        <img src="{{ product[2] }}" alt="상품이미지" />
         <p class="product-name">{{ product[0] }}</p>
         <p class="product-price">{{ "{:,}".format(product[1])}}원</p>
       </div>

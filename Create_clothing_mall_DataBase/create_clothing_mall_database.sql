@@ -189,3 +189,12 @@
 -- from product 
 -- cross join(select 'Free' as size) as sizes
 -- where product.article_type in ('Dupatta', 'Sarees', 'Stockings', 'Tights', 'Belts', 'Suspenders', 'Booties');
+
+-- 상품 이미지 테이블 생성
+-- create table product_image (
+-- 	image_id int auto_increment primary key,
+-- 	product_id int not null,
+--     image_url varchar(500) not null,
+--     
+--     foreign key (product_id) references product(product_id)
+-- );

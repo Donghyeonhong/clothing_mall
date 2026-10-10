@@ -7,7 +7,8 @@ load_dotenv()
 
 app = Flask(__name__)
 
-sql = """select product_name, price from product limit 20"""
+sql = """select product_name, price, image_url from product inner join 
+product_image on product.product_id = product_image.product_id limit 20"""
 
 @app.route("/")
 def home():
