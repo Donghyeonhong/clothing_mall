@@ -1,0 +1,57 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Document</title>
+    <link
+      rel="stylesheet"
+      href="{{ url_for('static', filename='style.css') }}"
+    />
+  </head>
+  <body>
+    <header>
+      <div class="header-top">
+        <h3 class="logo">CLOSET</h3>
+        <div class="header-actions">
+          <p>검색</p>
+          <p>로그인</p>
+          <p>장바구니</p>
+        </div>
+      </div>
+
+      <nav class="header-nav">
+        <a href="">전체</a>
+        <a href="">상의</a>
+        <a href="">하의</a>
+        <a href="">아우터</a>
+        <a href="">신발</a>
+      </nav>
+    </header>
+    <div class="product-detail">
+      <div class="product-image">
+        <img src="{{ product_detail[2] }}" alt="상품이미지" />
+      </div>
+
+      <div class="product-info">
+        <p class="detail-name">{{ product_detail[0] }}</p>
+        <p class="detail-price">{{ "{:,}".format(product_detail[1])}}원</p>
+
+        <div>
+          <p class="size-title">사이즈</p>
+
+          <div class="size-options">
+            <input type="radio" id="size-s" name="size" value="S" />
+            <label for="size-s">S</label>
+            <input type="radio" id="size-m" name="size" value="M" />
+            <label for="size-m">M</label>
+            <input type="radio" id="size-l" name="size" value="L" />
+            <label for="size-l">L</label>
+            <input type="radio" id="size-xl" name="size" value="XL" />
+            <label for="size-xl">XL</label>
+          </div>
+        </div>
+      </div>
+    </div>
+  </body>
+</html>

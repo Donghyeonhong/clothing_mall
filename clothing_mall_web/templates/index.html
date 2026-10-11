@@ -3,24 +3,44 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>나의 첫 웹 페이지</title>
+    <title>CLOSET</title>
     <link
       rel="stylesheet"
       href="{{ url_for('static', filename='style.css') }}"
     />
   </head>
   <body>
-    <h1>안녕! 나의 첫 번째 웹 페이지야!</h1>
-    <p>Flask와 HTML을 연결했어!</p>
+    <div class="container">
+      <header>
+        <div class="header-top">
+          <h3 class="logo">CLOSET</h3>
+          <div class="header-actions">
+            <p>검색</p>
+            <p>로그인</p>
+            <p>장바구니</p>
+          </div>
+        </div>
 
-    <div class="product-list">
-      {% for product in products %}
-      <div class="product-card">
-        <img src="{{ product[2] }}" alt="상품이미지" />
-        <p class="product-name">{{ product[0] }}</p>
-        <p class="product-price">{{ "{:,}".format(product[1])}}원</p>
+        <nav class="header-nav">
+          <a href="">전체</a>
+          <a href="">상의</a>
+          <a href="">하의</a>
+          <a href="">아우터</a>
+          <a href="">신발</a>
+        </nav>
+      </header>
+
+      <div class="product-list">
+        {% for product in products %}
+        <a href="/product/{{ product[3] }}">
+          <div class="product-card">
+            <img src="{{ product[2] }}" alt="상품이미지" />
+            <p class="product-name">{{ product[0] }}</p>
+            <p class="product-price">{{ "{:,}".format(product[1])}}원</p>
+          </div>
+        </a>
+        {% endfor %}
       </div>
-      {% endfor %}
     </div>
   </body>
 </html>
