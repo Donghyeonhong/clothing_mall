@@ -10,48 +10,122 @@
     />
   </head>
   <body>
-    <header>
-      <div class="header-top">
-        <h3 class="logo">CLOSET</h3>
-        <div class="header-actions">
-          <p>검색</p>
-          <p>로그인</p>
-          <p>장바구니</p>
-        </div>
-      </div>
-
-      <nav class="header-nav">
-        <a href="">전체</a>
-        <a href="">상의</a>
-        <a href="">하의</a>
-        <a href="">아우터</a>
-        <a href="">신발</a>
-      </nav>
-    </header>
-    <div class="product-detail">
-      <div class="product-image">
-        <img src="{{ product_detail[2] }}" alt="상품이미지" />
-      </div>
-
-      <div class="product-info">
-        <p class="detail-name">{{ product_detail[0] }}</p>
-        <p class="detail-price">{{ "{:,}".format(product_detail[1])}}원</p>
-
-        <div>
-          <p class="size-title">사이즈</p>
-
-          <div class="size-options">
-            <input type="radio" id="size-s" name="size" value="S" />
-            <label for="size-s">S</label>
-            <input type="radio" id="size-m" name="size" value="M" />
-            <label for="size-m">M</label>
-            <input type="radio" id="size-l" name="size" value="L" />
-            <label for="size-l">L</label>
-            <input type="radio" id="size-xl" name="size" value="XL" />
-            <label for="size-xl">XL</label>
+    <div class="container">
+      <header>
+        <div class="header-top">
+          <a href="/">
+            <h3 class="logo">CLOSET</h3>
+          </a>
+          <div class="header-actions">
+            <a href="">
+              <p>검색</p>
+            </a>
+            <a href="">
+              <p>로그인</p>
+            </a>
+            <a href="">
+              <p>장바구니</p>
+            </a>
           </div>
         </div>
-      </div>
+
+        <nav class="header-nav">
+          <a href="">전체</a>
+          <a href="">상의</a>
+          <a href="">하의</a>
+          <a href="">아우터</a>
+          <a href="">신발</a>
+        </nav>
+      </header>
+
+      {% with messages = get_flashed_messages() %} {% if messages %} {% for
+      message in messages %}
+      <p class="notice-message">{{ message }}</p>
+      {% endfor %} {% endif %} {% endwith %}
+
+      <form action="/cart/add" method="post">
+        <input
+          type="hidden"
+          name="product_id"
+          value="{{ product_detail[3] }}"
+        />
+
+        <div class="product-detail">
+          <div class="product-image">
+            <img src="{{ product_detail[2] }}" alt="상품이미지" />
+          </div>
+
+          <div class="product-info">
+            <p class="detail-name">{{ product_detail[0] }}</p>
+            <p class="detail-price">{{ "{:,}".format(product_detail[1])}}원</p>
+
+            <hr class="detail-divider" />
+
+            <div>
+              <p class="size-title">사이즈</p>
+
+              <div class="size-options">
+                <input
+                  type="radio"
+                  id="size-s"
+                  name="size"
+                  value="S"
+                  required
+                />
+                <label for="size-s">S</label>
+                <input type="radio" id="size-m" name="size" value="M" />
+                <label for="size-m">M</label>
+                <input type="radio" id="size-l" name="size" value="L" />
+                <label for="size-l">L</label>
+                <input type="radio" id="size-xl" name="size" value="XL" />
+                <label for="size-xl">XL</label>
+              </div>
+
+              <div class="quantity-section">
+                <p class="quantity-title">수량</p>
+
+                <div class="quantity-control">
+                  <button type="button" id="decrease">−</button>
+                  <input
+                    type="number"
+                    id="quantity"
+                    name="quantity"
+                    value="1"
+                    min="1"
+                  />
+                  <button type="button" id="increase">+</button>
+                </div>
+              </div>
+
+              <div class="product-actions">
+                <button type="button" class="wish-button">♡ 찜하기</button>
+                <button type="submit" class="cart-button">장바구니</button>
+                <button type="button" class="buy-button">구매하기</button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </form>
     </div>
+
+    <script>
+      const decreaseButton = document.getElementById("decrease");
+      const increaseButton = document.getElementById("increase");
+      const quantityDisplay = document.getElementById("quantity");
+
+      decreaseButton.addEventListener("click", function () {
+        let quantity = Number(quantityDisplay.value);
+
+        if (quantity > 1) {
+          quantityDisplay.value = quantity - 1;
+        }
+      });
+
+      increaseButton.addEventListener("click", function () {
+        let quantity = Number(quantityDisplay.value);
+
+        quantityDisplay.value = quantity + 1;
+      });
+    </script>
   </body>
 </html>
