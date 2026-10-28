@@ -8,8 +8,6 @@ load_dotenv()
 app = Flask(__name__)
 app.secret_key = os.getenv("FLASK_SECRET_KEY")
 
-sql = """select product_name, price, image_url, product.product_id from product inner join product_image on product.product_id = product_image.product_id limit 20"""
-
 @app.route("/")
 def home():
     conn = None
@@ -24,16 +22,47 @@ def home():
             )
         cursor = None
         try:
+            category = request.args.get('category', 'all')
             cursor = conn.cursor()
+
+            if category == 'all':
+                sql = """select product_name, price, image_url, product.product_id from product inner join product_image on product.product_id = product_image.product_id limit 20"""
+
+                product_count = """select count(*) from product inner join product_image on product.product_id = product_image.product_id"""
+
+            elif category == 'Topwear':
+                sql = """select product_name, price, image_url, product.product_id from product inner join product_image on product.product_id = product_image.product_id where sub_category = 'Topwear' and article_type not in('Jackets', 'Blazers', 'Rain Jacket', 'Nehru Jackets', 'Waistcoat', 'Shrug') limit 20"""
+
+                product_count = """select count(*) from product inner join product_image on product.product_id = product_image.product_id where sub_category = 'Topwear' and article_type not in('Jackets', 'Blazers', 'Rain Jacket', 'Nehru Jackets', 'Waistcoat', 'Shrug') """
+
+            elif category == 'Bottomwear':
+                sql = """select product_name, price, image_url, product.product_id from product inner join product_image on product.product_id = product_image.product_id where sub_category = 'Bottomwear' and article_type not in('Swimwear', 'Skirts', 'Stockings', 'Tights', 'Tracksuits', 'Salwar and Dupatta') limit 20"""
+
+                product_count = """select count(*) from product inner join product_image on product.product_id = product_image.product_id where sub_category = 'Bottomwear' and article_type not in('Swimwear', 'Skirts', 'Stockings', 'Tights', 'Tracksuits', 'Salwar and Dupatta')"""
+
+            elif category == 'Outerwear':
+                sql = """select product_name, price, image_url, product.product_id from product inner join product_image on product.product_id = product_image.product_id where article_type in ('Jackets', 'Blazers', 'Rain Jacket', 'Nehru Jackets', 'Waistcoat', 'Shrug') limit 20"""
+
+                product_count = """select count(*) from product inner join product_image on product.product_id = product_image.product_id where article_type in ('Jackets', 'Blazers', 'Rain Jacket', 'Nehru Jackets', 'Waistcoat', 'Shrug')"""
+
+            else:
+                sql = """select product_name, price, image_url, product.product_id from product inner join product_image on product.product_id = product_image.product_id where sub_category not in ('Topwear', 'Bottomwear') or article_type in ('Swimwear', 'Skirts', 'Stockings', 'Tights', 'Tracksuits', 'Salwar and Dupatta') limit 20"""
+
+                product_count = """select count(*) from product inner join product_image on product.product_id = product_image.product_id where sub_category not in ('Topwear', 'Bottomwear') or article_type in ('Swimwear', 'Skirts', 'Stockings', 'Tights', 'Tracksuits', 'Salwar and Dupatta')"""
+
+            print(sql)
             cursor.execute(sql)
             products = cursor.fetchall()
+
+            cursor.execute(product_count)
+            count_result = cursor.fetchone()
         finally:
             if cursor is not None:
                 cursor.close()
     finally:
         if conn is not None:
             conn.close()
-    return render_template("index.html", products = products)
+    return render_template("index.html", products = products, product_count=count_result[0])
 
 @app.route("/product/<int:product_id>")
 def product_detail_page(product_id):

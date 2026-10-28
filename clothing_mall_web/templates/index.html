@@ -17,26 +17,34 @@
             <h3 class="logo">CLOSET</h3>
           </a>
           <div class="header-actions">
-            <a href="">
-              <p>검색</p>
-            </a>
-            <a href="">
-              <p>로그인</p>
-            </a>
-            <a href="">
-              <p>장바구니</p>
-            </a>
+            <a href=""><p>검색</p></a>
+            <a href=""><p>로그인</p></a>
+            <a href=""><p>장바구니</p></a>
           </div>
         </div>
 
         <nav class="header-nav">
-          <a href="">전체</a>
-          <a href="">상의</a>
-          <a href="">하의</a>
-          <a href="">아우터</a>
-          <a href="">신발</a>
+          <a href="/">전체</a>
+          <a href="/?category=Topwear">상의</a>
+          <a href="/?category=Bottomwear">하의</a>
+          <a href="/?category=Outerwear">아우터</a>
+          <a href="/?category=Other">기타</a>
         </nav>
       </header>
+
+      <div class="middle">
+        <div class="count">
+          <p>상품 {{ "{:,}".format(product_count) }}개</p>
+        </div>
+        <div class="filter">
+          <select>
+            <option>인기순</option>
+            <option>최신순</option>
+            <option>높은 가격순</option>
+            <option>낮은 가격순</option>
+          </select>
+        </div>
+      </div>
 
       <div class="product-list">
         {% for product in products %}
