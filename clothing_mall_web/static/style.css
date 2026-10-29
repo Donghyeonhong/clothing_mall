@@ -178,6 +178,30 @@ header {
   width: 100%;
 }
 
+.pagination {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 8px;
+  margin: 40px 0;
+}
+
+.pagination a {
+  display: inline-block;
+  padding: 8px 13px;
+  color: black;
+  text-decoration: none;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+}
+
+.pagination a:hover,
+.pagination a.active {
+  background-color: #222;
+  color: white;
+  border-color: #222;
+}
+
 /* product_detail.html */
 .notice-message {
   color: #d93025;

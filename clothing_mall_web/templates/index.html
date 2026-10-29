@@ -57,6 +57,42 @@
         </a>
         {% endfor %}
       </div>
+
+      <div class="pagination">
+        <!-- 이전 버튼 -->
+        {% if start_page > 1 %}
+        <a
+          href="{{ url_for('home', category=request.args.get('category', 'all'), page=start_page - 1) }}"
+        >
+          &laquo; 이전
+        </a>
+        {% endif %}
+
+        <!-- 페이지 번호 -->
+        {% for p in range(start_page, end_page + 1) %} {% if p == page %}
+        <a
+          href="{{ url_for('home', category=request.args.get('category', 'all'), page=p) }}"
+          class="active"
+        >
+          {{ p }}
+        </a>
+        {% else %}
+        <a
+          href="{{ url_for('home', category=request.args.get('category', 'all'), page=p) }}"
+        >
+          {{ p }}
+        </a>
+        {% endif %} {% endfor %}
+
+        <!-- 다음 버튼 -->
+        {% if end_page < total_pages %}
+        <a
+          href="{{ url_for('home', category=request.args.get('category', 'all'), page=end_page + 1) }}"
+        >
+          다음 &raquo;
+        </a>
+        {% endif %}
+      </div>
     </div>
   </body>
 </html>

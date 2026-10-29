@@ -8,61 +8,59 @@ load_dotenv()
 app = Flask(__name__)
 app.secret_key = os.getenv("FLASK_SECRET_KEY")
 
+def get_db_connection():
+    return mysql.connector.connect(
+        host="localhost",
+        port=3306,
+        user="root",
+        password=os.getenv("DB_PASSWORD"),
+        database="clothing_mall"
+    )
+
 @app.route("/")
 def home():
     conn = None
     try:
         # mysql 연결
-        conn = mysql.connector.connect(
-            host="localhost",
-            port=3306,
-            user="root",
-            password=os.getenv("DB_PASSWORD"),
-            database="clothing_mall"
-            )
+        conn = get_db_connection()
         cursor = None
         try:
             category = request.args.get('category', 'all')
+            page = request.args.get('page', 1, type=int)
+            offset = (page - 1) * 20
             cursor = conn.cursor()
+            sql= """select product_name, price, image_url, product.product_id from product inner join product_image on product.product_id = product_image.product_id"""
+            product_count = """select count(*) from product inner join product_image on product.product_id = product_image.product_id"""
 
             if category == 'all':
-                sql = """select product_name, price, image_url, product.product_id from product inner join product_image on product.product_id = product_image.product_id limit 20"""
-
-                product_count = """select count(*) from product inner join product_image on product.product_id = product_image.product_id"""
-
+                condition = """"""
             elif category == 'Topwear':
-                sql = """select product_name, price, image_url, product.product_id from product inner join product_image on product.product_id = product_image.product_id where sub_category = 'Topwear' and article_type not in('Jackets', 'Blazers', 'Rain Jacket', 'Nehru Jackets', 'Waistcoat', 'Shrug') limit 20"""
-
-                product_count = """select count(*) from product inner join product_image on product.product_id = product_image.product_id where sub_category = 'Topwear' and article_type not in('Jackets', 'Blazers', 'Rain Jacket', 'Nehru Jackets', 'Waistcoat', 'Shrug') """
-
+                condition = """ where sub_category = 'Topwear' and article_type not in('Jackets', 'Blazers', 'Rain Jacket', 'Nehru Jackets', 'Waistcoat', 'Shrug')"""
             elif category == 'Bottomwear':
-                sql = """select product_name, price, image_url, product.product_id from product inner join product_image on product.product_id = product_image.product_id where sub_category = 'Bottomwear' and article_type not in('Swimwear', 'Skirts', 'Stockings', 'Tights', 'Tracksuits', 'Salwar and Dupatta') limit 20"""
-
-                product_count = """select count(*) from product inner join product_image on product.product_id = product_image.product_id where sub_category = 'Bottomwear' and article_type not in('Swimwear', 'Skirts', 'Stockings', 'Tights', 'Tracksuits', 'Salwar and Dupatta')"""
-
+                condition = """ where sub_category = 'Bottomwear' and article_type not in('Swimwear', 'Skirts', 'Stockings', 'Tights', 'Tracksuits', 'Salwar and Dupatta')"""
             elif category == 'Outerwear':
-                sql = """select product_name, price, image_url, product.product_id from product inner join product_image on product.product_id = product_image.product_id where article_type in ('Jackets', 'Blazers', 'Rain Jacket', 'Nehru Jackets', 'Waistcoat', 'Shrug') limit 20"""
-
-                product_count = """select count(*) from product inner join product_image on product.product_id = product_image.product_id where article_type in ('Jackets', 'Blazers', 'Rain Jacket', 'Nehru Jackets', 'Waistcoat', 'Shrug')"""
-
+                condition = """ where article_type in ('Jackets', 'Blazers', 'Rain Jacket', 'Nehru Jackets', 'Waistcoat', 'Shrug')"""
             else:
-                sql = """select product_name, price, image_url, product.product_id from product inner join product_image on product.product_id = product_image.product_id where sub_category not in ('Topwear', 'Bottomwear') or article_type in ('Swimwear', 'Skirts', 'Stockings', 'Tights', 'Tracksuits', 'Salwar and Dupatta') limit 20"""
+                condition = """ where sub_category not in ('Topwear', 'Bottomwear') or article_type in ('Swimwear', 'Skirts', 'Stockings', 'Tights', 'Tracksuits', 'Salwar and Dupatta')""" 
 
-                product_count = """select count(*) from product inner join product_image on product.product_id = product_image.product_id where sub_category not in ('Topwear', 'Bottomwear') or article_type in ('Swimwear', 'Skirts', 'Stockings', 'Tights', 'Tracksuits', 'Salwar and Dupatta')"""
+            sql = sql + condition + f""" limit {offset}, 20"""
+            product_count = product_count + condition
 
-            print(sql)
             cursor.execute(sql)
             products = cursor.fetchall()
 
             cursor.execute(product_count)
             count_result = cursor.fetchone()
+            total_pages = (count_result[0] + 19) // 20
+            start_page = ((page - 1) // 5) * 5 + 1
+            end_page = min(start_page+4, total_pages)
         finally:
             if cursor is not None:
                 cursor.close()
     finally:
         if conn is not None:
             conn.close()
-    return render_template("index.html", products = products, product_count=count_result[0])
+    return render_template("index.html", products = products, product_count=count_result[0], page=page, total_pages=total_pages, start_page=start_page, end_page=end_page)
 
 @app.route("/product/<int:product_id>")
 def product_detail_page(product_id):
@@ -75,13 +73,7 @@ def product_detail_page(product_id):
     conn = None
     try:
         # mysql 연결
-        conn = mysql.connector.connect(
-            host="localhost",
-            port=3306,
-            user="root",
-            password=os.getenv("DB_PASSWORD"),
-            database="clothing_mall"
-            )
+        conn = get_db_connection()
         cursor = None
         try:
             cursor = conn.cursor()
@@ -114,13 +106,7 @@ def add_to_cart():
     conn = None
     try:
         # mysql 연결
-        conn = mysql.connector.connect(
-            host="localhost",
-            port=3306,
-            user="root",
-            password=os.getenv("DB_PASSWORD"),
-            database="clothing_mall"
-            )
+        conn = get_db_connection()
         cursor = None
         try:
             cursor = conn.cursor()
