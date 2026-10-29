@@ -17,7 +17,22 @@
             <h3 class="logo">CLOSET</h3>
           </a>
           <div class="header-actions">
-            <a href=""><p>검색</p></a>
+            <a href="#" id="search-toggle"><p>검색</p></a>
+            <form
+              action="{{ url_for('home') }}"
+              method="GET"
+              id="search-form"
+              style="display: none"
+            >
+              <input type="hidden" name="category" value="{{ category }}" />
+              <input
+                type="text"
+                name="keyword"
+                value="{{ keyword }}"
+                placeholder="상품명을 입력하세요"
+              />
+              <button type="submit">검색</button>
+            </form>
             <a href=""><p>로그인</p></a>
             <a href=""><p>장바구니</p></a>
           </div>
@@ -55,6 +70,8 @@
             <p class="product-price">{{ "{:,}".format(product[1])}}원</p>
           </div>
         </a>
+        {% else %}
+        <p>검색 결과가 없습니다.</p>
         {% endfor %}
       </div>
 
@@ -62,7 +79,7 @@
         <!-- 이전 버튼 -->
         {% if start_page > 1 %}
         <a
-          href="{{ url_for('home', category=request.args.get('category', 'all'), page=start_page - 1) }}"
+          href="{{ url_for('home', category=category, keyword=keyword, page=start_page - 1) }}"
         >
           &laquo; 이전
         </a>
@@ -71,14 +88,14 @@
         <!-- 페이지 번호 -->
         {% for p in range(start_page, end_page + 1) %} {% if p == page %}
         <a
-          href="{{ url_for('home', category=request.args.get('category', 'all'), page=p) }}"
+          href="{{ url_for('home', category=category, keyword=keyword, page=p) }}"
           class="active"
         >
           {{ p }}
         </a>
         {% else %}
         <a
-          href="{{ url_for('home', category=request.args.get('category', 'all'), page=p) }}"
+          href="{{ url_for('home', category=category, keyword=keyword, page=p) }}"
         >
           {{ p }}
         </a>
@@ -87,12 +104,31 @@
         <!-- 다음 버튼 -->
         {% if end_page < total_pages %}
         <a
-          href="{{ url_for('home', category=request.args.get('category', 'all'), page=end_page + 1) }}"
+          href="{{ url_for('home', category=category, keyword=keyword, page=end_page + 1) }}"
         >
           다음 &raquo;
         </a>
         {% endif %}
       </div>
     </div>
+
+    <script>
+      const searchToggle = document.getElementById("search-toggle");
+      const searchToggleText = searchToggle.querySelector("p");
+      const searchForm = document.getElementById("search-form");
+
+      searchToggle.addEventListener("click", function (event) {
+        event.preventDefault();
+
+        if (searchForm.style.display === "none") {
+          searchForm.style.display = "flex";
+          searchToggleText.textContent = "닫기";
+          searchForm.querySelector('input[name="keyword"]').focus();
+        } else {
+          searchForm.style.display = "none";
+          searchToggleText.textContent = "검색";
+        }
+      });
+    </script>
   </body>
 </html>

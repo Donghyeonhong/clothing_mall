@@ -27,7 +27,10 @@ def home():
         try:
             category = request.args.get('category', 'all')
             page = request.args.get('page', 1, type=int)
+            page = max(page, 1)
             offset = (page - 1) * 20
+            keyword = request.args.get('keyword', '').strip()
+
             cursor = conn.cursor()
             sql= """select product_name, price, image_url, product.product_id from product inner join product_image on product.product_id = product_image.product_id"""
             product_count = """select count(*) from product inner join product_image on product.product_id = product_image.product_id"""
@@ -41,26 +44,53 @@ def home():
             elif category == 'Outerwear':
                 condition = """ where article_type in ('Jackets', 'Blazers', 'Rain Jacket', 'Nehru Jackets', 'Waistcoat', 'Shrug')"""
             else:
-                condition = """ where sub_category not in ('Topwear', 'Bottomwear') or article_type in ('Swimwear', 'Skirts', 'Stockings', 'Tights', 'Tracksuits', 'Salwar and Dupatta')""" 
+                condition = """ where (sub_category not in ('Topwear', 'Bottomwear') or article_type in ('Swimwear', 'Skirts', 'Stockings', 'Tights', 'Tracksuits', 'Salwar and Dupatta'))""" 
 
-            sql = sql + condition + f""" limit {offset}, 20"""
-            product_count = product_count + condition
+            sql += condition 
+            product_count += condition
 
-            cursor.execute(sql)
+            if keyword:
+                if condition:
+                    sql += " and product_name like %s"
+                    product_count += " and product_name like %s"
+                else:
+                    sql += " where product_name like %s"
+                    product_count += " where product_name like %s"
+
+            if keyword:
+                cursor.execute(product_count, (f"%{keyword}%",))
+            else:
+                cursor.execute(product_count)
+            count_result = cursor.fetchone()
+
+            total_pages = (count_result[0] + 19) // 20
+
+            if total_pages > 0:
+                page = min(page, total_pages)
+            else:
+                page = 1
+
+            offset = (page - 1) * 20
+
+            sql += f" limit {offset}, 20"
+
+            if keyword:
+                cursor.execute(sql, (f"%{keyword}%",))
+            else:
+                cursor.execute(sql)
+                
             products = cursor.fetchall()
 
-            cursor.execute(product_count)
-            count_result = cursor.fetchone()
-            total_pages = (count_result[0] + 19) // 20
             start_page = ((page - 1) // 5) * 5 + 1
             end_page = min(start_page+4, total_pages)
+
         finally:
             if cursor is not None:
                 cursor.close()
     finally:
         if conn is not None:
             conn.close()
-    return render_template("index.html", products = products, product_count=count_result[0], page=page, total_pages=total_pages, start_page=start_page, end_page=end_page)
+    return render_template("index.html", products = products, product_count=count_result[0], page=page, total_pages=total_pages, start_page=start_page, end_page=end_page, keyword=keyword, category=category)
 
 @app.route("/product/<int:product_id>")
 def product_detail_page(product_id):

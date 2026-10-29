@@ -65,6 +65,27 @@ header {
   color: #777777;
 }
 
+#search-form {
+  align-items: center;
+  gap: 5px;
+}
+
+#search-form input {
+  width: 180px;
+  padding: 8px;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+}
+
+#search-form button {
+  padding: 8px 12px;
+  border: none;
+  border-radius: 4px;
+  background-color: #222;
+  color: white;
+  cursor: pointer;
+}
+
 .header-nav {
   display: flex;
   justify-content: left;
